@@ -1,7 +1,7 @@
 {
-  "name": "ai-agent-frontend",
+  "name": "professional-shop-assistant",
   "version": "1.0.0",
-  "description": "Premium Interactive Q&A AI Agent Interface",
+  "description": "Premium Technical Minimalism UI for Professional Shop Assistant AI",
   "type": "module",
   "scripts": {
     "dev": "vite",

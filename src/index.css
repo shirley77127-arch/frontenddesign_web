@@ -3,22 +3,38 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    @apply border-charcoal;
+    border-radius: 0px !important;
+  }
+  
   body {
-    @apply bg-bone-paper text-black antialiased;
-    font-family: 'JetBrains Mono', monospace;
+    @apply bg-bone text-charcoal antialiased;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  input, textarea, button {
+    border-radius: 0px !important;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .font-display {
+    font-family: 'Clash Display', 'Syne', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+
+  .grayscale {
+    filter: grayscale(100%);
+  }
+
+  .grayscale-0 {
+    filter: grayscale(0%);
   }
 }
 

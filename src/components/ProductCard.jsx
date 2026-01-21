@@ -1,86 +1,99 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 
-const ProductCard = ({ 
-  product, 
-  index = 0,
-  onSelect 
-}) => {
+function ProductCard({ product }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const specs = Object.entries(product.specs)
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.4 }}
-      className="border border-black/20 bg-white hover:border-electric-cobalt/50 transition-all cursor-pointer group shadow-sm"
-      onClick={onSelect}
+    <div 
+      className="border border-charcoal bg-white shadow-hard"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setIsHovered(false)}
     >
-      {/* Blueprint-style grid overlay */}
-      <div className="relative overflow-hidden">
-        {product.image ? (
-          <div className="aspect-[4/3] bg-black/5 relative overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            {/* Grid overlay */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id={`grid-${index}`} width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(46, 91, 255, 0.3)" strokeWidth="0.5"/>
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill={`url(#grid-${index})`} />
-              </svg>
-            </div>
-          </div>
-        ) : (
-          <div className="aspect-[4/3] bg-black/5 flex items-center justify-center">
-            <span className="text-black/30 font-mono text-xs">无图片</span>
-          </div>
-        )}
+      {/* Product Image - Architectural Blueprint Style */}
+      <div className="w-full h-64 bg-charcoal/5 relative overflow-hidden border-b border-charcoal">
+        <img
+          src={product.image}
+          alt={product.name}
+          className={`w-full h-full object-cover transition-all duration-300 ${
+            isHovered ? 'grayscale-0' : 'grayscale'
+          }`}
+          style={{
+            filter: isHovered ? 'grayscale(0%)' : 'grayscale(100%)',
+          }}
+        />
+        {/* Blueprint Grid Overlay */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none" 
+          style={{
+            backgroundImage: `
+              linear-gradient(#1A1A1A 1px, transparent 1px),
+              linear-gradient(90deg, #1A1A1A 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px',
+          }}
+        />
       </div>
 
       {/* Product Info */}
-      <div className="p-6 border-t border-black/10">
-        <h3 className="font-display text-lg font-semibold mb-2 text-black">
-          {product.name}
-        </h3>
-        {product.description && (
-          <p className="text-sm font-mono text-black/70 mb-4 line-clamp-2">
-            {product.description}
-          </p>
-        )}
-        
-        {/* Specifications */}
-        {product.specs && (
-          <div className="space-y-2 mb-4">
-            {Object.entries(product.specs).slice(0, 3).map(([key, value]) => (
-              <div key={key} className="flex justify-between text-xs font-mono">
-                <span className="text-black/50">{key}:</span>
-                <span className="text-black/80">{value}</span>
-              </div>
-            ))}
+      <div className="px-6 py-6 space-y-6">
+        {/* Title and Price */}
+        <div className="border-b border-charcoal pb-4">
+          <h3 className="font-display text-xl leading-tight text-charcoal mb-2">
+            {product.name}
+          </h3>
+          <div className="font-mono text-xs uppercase tracking-wider text-charcoal">
+            {product.price}
           </div>
-        )}
+        </div>
 
-        {/* Price and CTA */}
-        <div className="flex items-center justify-between pt-4 border-t border-black/10">
-          {product.price && (
-            <span className="font-display text-xl font-bold text-black">
-              {product.price}
-            </span>
-          )}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 py-2 bg-electric-cobalt text-white font-mono text-xs uppercase tracking-wider hover:bg-electric-cobalt/80 transition-colors"
+        {/* Technical Specs Table - Manifest Style */}
+        <div className="space-y-0 border border-charcoal">
+          {specs.map(([key, value], index) => (
+            <div
+              key={key}
+              className={`grid grid-cols-2 gap-6 py-3 px-4 ${
+                index < specs.length - 1 ? 'border-b border-charcoal' : ''
+              }`}
+            >
+              <div className="font-mono text-xs uppercase tracking-wider text-secondary">
+                {key}
+              </div>
+              <div className="font-mono text-xs text-charcoal">
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Proceed Link */}
+        <div className="pt-4 border-t border-charcoal">
+          <a
+            href="#"
+            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-charcoal hover:text-orange transition-colors group"
           >
-            查看详情
-          </motion.button>
+            PROCEED TO CHECKOUT
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="transform group-hover:translate-x-1 transition-transform"
+            >
+              <path
+                d="M1 6H11M11 6L6 1M11 6L6 11"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 

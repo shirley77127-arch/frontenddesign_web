@@ -1,193 +1,185 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import ConversationArchitecture from './components/ConversationArchitecture'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import MessageBlock from './components/MessageBlock'
-import AgentThinking from './components/AgentThinking'
-import ProductCard from './components/ProductCard'
-import StepByStepGuide from './components/StepByStepGuide'
-import MediaGallery from './components/MediaGallery'
-import InputArea from './components/InputArea'
+import ProgressThread from './components/ProgressThread'
+import TopProgressBar from './components/TopProgressBar'
+import ScanningEffect from './components/ScanningEffect'
+import InputBar from './components/InputBar'
 
 function App() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'agent',
-      message: '我已经分析了您对高性能工作站的需求。根据您的规格要求，我找到了3个最佳配置方案。',
-      metadata: {
-        confidence: 94,
-        source: '产品数据库 v2.1',
-        timestamp: '14:32:18',
-      },
-      children: (
-        <StepByStepGuide index={0} />
-      ),
-    },
-    {
-      id: 2,
-      type: 'agent',
-      message: '以下是与您的要求匹配的顶级推荐产品：',
-      metadata: {
-        confidence: 91,
-        source: '推荐引擎',
-        timestamp: '14:32:22',
-      },
-      children: (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          <ProductCard
-            product={{
-              name: '专业工作站 X9',
-              description: '企业级工作站，支持双GPU和ECC内存',
-              price: '¥29,999',
-              specs: {
-                CPU: 'Intel Xeon W-2295',
-                内存: '64GB ECC',
-                显卡: '2x RTX 4090',
-              },
-            }}
-            index={0}
-          />
-          <ProductCard
-            product={{
-              name: '超算工作站 Z7',
-              description: '高频CPU，针对单线程性能优化',
-              price: '¥27,199',
-              specs: {
-                CPU: 'AMD Ryzen 9 7950X',
-                内存: '128GB DDR5',
-                显卡: 'RTX 4080',
-              },
-            }}
-            index={1}
-          />
-          <ProductCard
-            product={{
-              name: '创意工作站 M5',
-              description: '为创意专业人士打造的平衡性能配置',
-              price: '¥20,999',
-              specs: {
-                CPU: 'Intel i9-13900K',
-                内存: '32GB DDR5',
-                显卡: 'RTX 4070 Ti',
-              },
-            }}
-            index={2}
-          />
-        </div>
-      ),
-    },
-    {
-      id: 3,
-      type: 'agent',
-      message: '技术对比矩阵和详细规格参数：',
-      metadata: {
-        confidence: 88,
-        source: '规格数据库',
-        timestamp: '14:32:25',
-        technicalDetails: {
-          comparison: {
-            '专业工作站 X9': {
-              '单核得分': 1850,
-              '多核得分': 24500,
-              'GPU 算力': '98.5 TFLOPS',
-            },
-            '超算工作站 Z7': {
-              '单核得分': 2100,
-              '多核得分': 32000,
-              'GPU 算力': '83.2 TFLOPS',
-            },
-            '创意工作站 M5': {
-              '单核得分': 1950,
-              '多核得分': 18500,
-              'GPU 算力': '66.5 TFLOPS',
-            },
-          },
-        },
-      },
-    },
-  ])
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
+  const [progress, setProgress] = useState(0)
 
-  const handleSend = async (text) => {
-    // Add user message
-    const userMessage = {
-      id: messages.length + 1,
-      type: 'user',
-      message: text,
+  const handleSend = (content) => {
+    const newMessage = {
+      id: `ID-${String(messages.length + 1).padStart(3, '0')}`,
+      type: 'USER_QUERY',
+      content,
+      timestamp: Date.now(),
     }
-    setMessages((prev) => [...prev, userMessage])
-    setIsProcessing(true)
+    const updatedMessages = [...messages, newMessage]
+    setMessages(updatedMessages)
 
-    // Simulate AI processing
+    // Simulate AI response
     setTimeout(() => {
-      const agentResponse = {
-        id: messages.length + 2,
-        type: 'agent',
-        message: '正在处理您的请求并分析产品数据库，这可能需要几秒钟。',
-        metadata: {
-          confidence: 85,
-          source: 'AI 智能助手 v3.0',
-          timestamp: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
-        },
-      }
-      setMessages((prev) => [...prev, agentResponse])
-      setIsProcessing(false)
-    }, 2000)
+      setIsLoading(true)
+      setProgress(0)
+      
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(progressInterval)
+            return 100
+          }
+          return prev + 2
+        })
+      }, 30)
+
+      setTimeout(() => {
+        setIsScanning(true)
+        setTimeout(() => {
+          setIsScanning(false)
+          setIsLoading(false)
+          setProgress(0)
+          
+          const aiResponse = {
+            id: `ID-${String(updatedMessages.length + 1).padStart(3, '0')}`,
+            type: 'AI_RESPONSE',
+            content: 'I understand your request. Processing...',
+            timestamp: Date.now(),
+          }
+          setMessages((prev) => [...prev, aiResponse])
+        }, 1500)
+      }, 2000)
+    }, 500)
   }
 
+  // Demo data initialization
+  useEffect(() => {
+    const initialMessages = [
+      {
+        id: 'ID-001',
+        type: 'USER_QUERY',
+        content: 'Show me professional-grade wireless headphones with noise cancellation.',
+        timestamp: Date.now() - 2000,
+      },
+    ]
+    setMessages(initialMessages)
+
+    // Simulate AI response after delay
+    setTimeout(() => {
+      setIsLoading(true)
+      setProgress(0)
+      
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(progressInterval)
+            return 100
+          }
+          return prev + 2
+        })
+      }, 30)
+
+      setTimeout(() => {
+        setIsScanning(true)
+        setTimeout(() => {
+          setIsScanning(false)
+          setIsLoading(false)
+          setProgress(0)
+          
+          setMessages([
+            ...initialMessages,
+            {
+              id: 'ID-002',
+              type: 'AI_RESPONSE',
+              content: 'I found 3 professional-grade wireless headphones matching your criteria.',
+              timestamp: Date.now(),
+              products: [
+                {
+                  id: 'PROD-001',
+                  name: 'Sennheiser Momentum 4',
+                  image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=600&fit=crop',
+                  specs: {
+                    'Driver Size': '42mm',
+                    'Frequency': '6Hz - 22kHz',
+                    'Battery': '60 hours',
+                    'Weight': '293g',
+                    'ANC': 'Active',
+                    'Codec': 'AAC, aptX HD',
+                  },
+                  price: '$349.99',
+                },
+                {
+                  id: 'PROD-002',
+                  name: 'Bose QuietComfort Ultra',
+                  image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800&h=600&fit=crop',
+                  specs: {
+                    'Driver Size': 'Custom 40mm',
+                    'Frequency': '20Hz - 20kHz',
+                    'Battery': '24 hours',
+                    'Weight': '253g',
+                    'ANC': 'Adaptive',
+                    'Codec': 'AAC, SBC',
+                  },
+                  price: '$429.99',
+                },
+                {
+                  id: 'PROD-003',
+                  name: 'Sony WH-1000XM5',
+                  image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=600&fit=crop',
+                  specs: {
+                    'Driver Size': '30mm',
+                    'Frequency': '4Hz - 40kHz',
+                    'Battery': '30 hours',
+                    'Weight': '250g',
+                    'ANC': 'Industry Leading',
+                    'Codec': 'LDAC, AAC',
+                  },
+                  price: '$399.99',
+                },
+              ],
+            },
+          ])
+        }, 1500)
+      }, 2000)
+    }, 1000)
+  }, [])
+
   return (
-    <div className="h-screen flex flex-col bg-bone-paper overflow-hidden">
-      {/* Header */}
-      <header className="border-b border-black/10 px-12 py-6 bg-bone-paper z-30">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-black mb-1">
-              AI 智能助手
-            </h1>
-            <p className="text-xs font-mono text-black/60 uppercase tracking-wider">
-              高端产品咨询系统
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-electric-cobalt rounded-full animate-pulse" />
-              <span className="text-xs font-mono text-black/70">系统运行中</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Layout */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Conversation Architecture */}
-        <ConversationArchitecture />
-
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-5xl mx-auto">
-              {messages.map((msg, index) => (
-                <MessageBlock
-                  key={msg.id}
-                  message={msg.message}
-                  metadata={msg.metadata}
-                  index={index}
-                  type={msg.type}
-                >
-                  {msg.children}
-                </MessageBlock>
-              ))}
-              
-              {/* Thinking Indicator */}
-              {isProcessing && <AgentThinking isVisible={isProcessing} />}
-            </div>
-          </div>
-
-          {/* Input Area */}
-          <InputArea onSend={handleSend} isProcessing={isProcessing} />
+    <div className="min-h-screen bg-bone h-screen overflow-y-auto">
+      <TopProgressBar progress={progress} isActive={isLoading} />
+      
+      <div className="max-w-md mx-auto min-h-screen relative pb-24">
+        <ProgressThread messageCount={messages.length} messages={messages} />
+        
+        <div className="pl-24 pr-6 py-6 relative">
+          <AnimatePresence>
+            {messages.map((message, index) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut', delay: index * 0.1 }}
+                className="relative mb-6"
+              >
+                {isScanning && index === messages.length - 1 && (
+                  <ScanningEffect />
+                )}
+                <MessageBlock message={message} />
+                {index < messages.length - 1 && (
+                  <div className="h-px bg-charcoal my-6" />
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
+
+      <InputBar onSend={handleSend} />
     </div>
   )
 }
